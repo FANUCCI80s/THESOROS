@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Dashboard — THÉSOROS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0a0a0a;--elev:#111;--card:#161616;--fg:#f5f5f5;--muted:#a3a3a3;--gold:#d4af37;--border:#262626;--gm:rgba(212,175,55,.15)}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+.serif{font-family:"Playfair Display",Georgia,serif}.logo{font-family:"Playfair Display",serif;color:var(--gold);font-weight:600}
+.dash{display:flex;min-height:100vh}
+.side{width:240px;background:var(--elev);border-right:1px solid var(--border);padding:20px;flex-shrink:0}
+.side a{display:block;padding:10px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:2px}
+.side a.on{background:var(--gm);color:var(--gold)}
+.main{flex:1;padding:32px 28px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.bal{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0}
+.bal h4{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px}
+.bal .v{font-size:24px;font-weight:600}.bal .v.g{color:var(--gold)}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:12px;background:var(--gm);color:var(--gold)}
+@media(max-width:800px){.side{display:none}.bal{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="dash">
+<aside class="side">
+  <div class="logo" style="font-size:1.25rem;margin-bottom:20px">THÉSOROS</div>
+  <a class="on" href="#">Dashboard</a>
+  <a href="#">Deposit</a>
+  <a href="#">Withdrawal</a>
+  <a href="#">Transactions</a>
+  <a href="#">Profile</a>
+</aside>
+<div class="main">
+  <h1 class="serif" style="font-size:1.75rem">Welcome back, Alex</h1>
+  <p style="color:var(--muted);font-size:14px;margin-top:6px">Active plan: <span class="pill">GOLD</span></p>
+  <div class="bal">
+    <div class="card"><h4>Available Balance</h4><div class="v g">$12,500.00</div></div>
+    <div class="card"><h4>Invested Balance</h4><div class="v">$45,000.00</div></div>
+    <div class="card"><h4>Portfolio Value</h4><div class="v">$57,500.00</div></div>
+  </div>
+  <div class="card">
+    <h4 style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Investment Status</h4>
+    <span class="pill">GOLD</span>
+    <span style="color:var(--muted);font-size:14px;margin-left:12px">Plan-based performance is active</span>
+  </div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,505 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  role          UserRole       @default(USER)
+  status        UserStatus     @default(ACTIVE)
+  emailVerified Boolean        @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  account       Account?
+  auditLogs     AuditLog[]     @relation("AuditActor")
+  deposits      Deposit[]
+  investments   Investment[]
+  kyc           Kyc?
+  notifications Notification[]
+  otpChallenges OtpChallenge[]
+  sessions      Session[]
+  transactions  Transaction[]
+  withdrawals   Withdrawal[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
+model Account {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  availableBalance Decimal  @default(0) @db.Decimal(18, 8)
+  investedBalance  Decimal  @default(0) @db.Decimal(18, 8)
+  currency         String   @default("USD")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model OtpChallenge {
+  id         String     @id @default(cuid())
+  userId     String
+  codeHash   String
+  purpose    OtpPurpose
+  status     OtpStatus  @default(PENDING)
+  expiresAt  DateTime
+  attempts   Int        @default(0)
+  createdAt  DateTime   @default(now())
+  verifiedAt DateTime?
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose, status])
+  @@index([expiresAt])
+}
+
+model Kyc {
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  status          KycStatus     @default(NOT_SUBMITTED)
+  fullName        String?
+  dateOfBirth     DateTime?
+  nationality     String?
+  address         String?
+  city            String?
+  country         String?
+  postalCode      String?
+  phoneNumber     String?
+  rejectionReason String?
+  submittedAt     DateTime?
+  reviewedAt      DateTime?
+  reviewedById    String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents       KycDocument[]
+
+  @@index([status])
+}
+
+model KycDocument {
+  id         String          @id @default(cuid())
+  kycId      String
+  type       KycDocumentType
+  fileName   String
+  fileUrl    String
+  mimeType   String?
+  size       Int?
+  uploadedAt DateTime        @default(now())
+  kyc        Kyc             @relation(fields: [kycId], references: [id], onDelete: Cascade)
+
+  @@index([kycId])
+}
+
+model Cryptocurrency {
+  id                      String                          @id @default(cuid())
+  symbol                  String                          @unique
+  name                    String
+  isActive                Boolean                         @default(true)
+  createdAt               DateTime                        @default(now())
+  updatedAt               DateTime                        @updatedAt
+  automaticDepositConfigs AutomaticDepositConfiguration[]
+  networks                CryptoNetwork[]
+  deposits                Deposit[]
+  manualDepositConfigs    ManualDepositConfiguration[]
+  withdrawals             Withdrawal[]
+}
+
+model CryptoNetwork {
+  id                      String                          @id @default(cuid())
+  cryptocurrencyId        String
+  name                    String
+  chainId                 String?
+  status                  NetworkStatus                   @default(ACTIVE)
+  createdAt               DateTime                        @default(now())
+  updatedAt               DateTime                        @updatedAt
+  automaticDepositConfigs AutomaticDepositConfiguration[]
+  cryptocurrency          Cryptocurrency                  @relation(fields: [cryptocurrencyId], references: [id], onDelete: Cascade)
+  deposits                Deposit[]
+  manualDepositConfigs    ManualDepositConfiguration[]
+  withdrawals             Withdrawal[]
+
+  @@unique([cryptocurrencyId, name])
+  @@index([cryptocurrencyId])
+}
+
+model ManualDepositConfiguration {
+  id               String         @id @default(cuid())
+  cryptocurrencyId String
+  networkId        String
+  walletAddress    String
+  qrCodeUrl        String?
+  warningMessage   String?
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  cryptocurrency   Cryptocurrency @relation(fields: [cryptocurrencyId], references: [id])
+  network          CryptoNetwork  @relation(fields: [networkId], references: [id])
+
+  @@unique([cryptocurrencyId, networkId])
+  @@index([isActive])
+}
+
+model AutomaticDepositConfiguration {
+  id               String         @id @default(cuid())
+  cryptocurrencyId String
+  networkId        String?
+  paymentUrl       String
+  walletAddress    String?
+  qrCodeUrl        String?
+  warningMessage   String?
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  cryptocurrency   Cryptocurrency @relation(fields: [cryptocurrencyId], references: [id])
+  network          CryptoNetwork? @relation(fields: [networkId], references: [id])
+
+  @@index([isActive])
+}
+
+model Deposit {
+  id               String         @id @default(cuid())
+  userId           String
+  method           DepositMethod
+  status           DepositStatus  @default(PENDING)
+  amount           Decimal        @db.Decimal(18, 8)
+  cryptocurrencyId String
+  networkId        String?
+  walletAddress    String?
+  paymentReference String?
+  proofUrl         String?
+  adminNote        String?
+  reviewedAt       DateTime?
+  reviewedById     String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  cryptocurrency   Cryptocurrency @relation(fields: [cryptocurrencyId], references: [id])
+  network          CryptoNetwork? @relation(fields: [networkId], references: [id])
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction      Transaction?
+
+  @@index([userId])
+  @@index([status])
+  @@index([method])
+  @@index([createdAt])
+}
+
+model Withdrawal {
+  id                 String           @id @default(cuid())
+  userId             String
+  status             WithdrawalStatus @default(PENDING)
+  amount             Decimal          @db.Decimal(18, 8)
+  cryptocurrencyId   String
+  networkId          String
+  destinationAddress String
+  adminNote          String?
+  txHash             String?
+  reviewedAt         DateTime?
+  reviewedById       String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  transaction        Transaction?
+  cryptocurrency     Cryptocurrency   @relation(fields: [cryptocurrencyId], references: [id])
+  network            CryptoNetwork    @relation(fields: [networkId], references: [id])
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Transaction {
+  id            String            @id @default(cuid())
+  userId        String
+  type          TransactionType
+  status        TransactionStatus @default(PENDING)
+  amount        Decimal           @db.Decimal(18, 8)
+  balanceBefore Decimal           @db.Decimal(18, 8)
+  balanceAfter  Decimal           @db.Decimal(18, 8)
+  reference     String            @unique
+  description   String?
+  metadata      Json?
+  depositId     String?           @unique
+  withdrawalId  String?           @unique
+  investmentId  String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  deposit       Deposit?          @relation(fields: [depositId], references: [id])
+  investment    Investment?       @relation(fields: [investmentId], references: [id])
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  withdrawal    Withdrawal?       @relation(fields: [withdrawalId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@index([reference])
+}
+
+model InvestmentPlan {
+  id               String               @id @default(cuid())
+  name             String
+  description      String?
+  minAmount        Decimal              @db.Decimal(18, 8)
+  maxAmount        Decimal?             @db.Decimal(18, 8)
+  durationDays     Int
+  returnPercentage Decimal              @db.Decimal(8, 4)
+  assetsIncluded   String?
+  status           InvestmentPlanStatus @default(ACTIVE)
+  sortOrder        Int                  @default(0)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  investments      Investment[]
+
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model Investment {
+  id             String           @id @default(cuid())
+  userId         String
+  planId         String
+  principal      Decimal          @db.Decimal(18, 8)
+  currentValue   Decimal          @db.Decimal(18, 8)
+  profit         Decimal          @default(0) @db.Decimal(18, 8)
+  performancePct Decimal          @default(0) @db.Decimal(8, 4)
+  status         InvestmentStatus @default(ACTIVE)
+  startDate      DateTime         @default(now())
+  maturityDate   DateTime
+  maturedAt      DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  plan           InvestmentPlan   @relation(fields: [planId], references: [id])
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([maturityDate])
+}
+
+model Notification {
+  id        String             @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  status    NotificationStatus @default(UNREAD)
+  metadata  Json?
+  createdAt DateTime           @default(now())
+  readAt    DateTime?
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  actorId    String?
+  action     AuditAction
+  entityType String?
+  entityId   String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime    @default(now())
+  actor      User?       @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  position  String
+  imageUrl  String?
+  bio       String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model PlatformSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model Notice {
+  id        String    @id @default(cuid())
+  title     String
+  content   String
+  isActive  Boolean   @default(true)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([isActive])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_VERIFICATION
+}
+
+enum KycStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+enum KycDocumentType {
+  PASSPORT
+  NATIONAL_ID
+  DRIVERS_LICENSE
+  PROOF_OF_ADDRESS
+  SELFIE
+  OTHER
+}
+
+enum OtpPurpose {
+  LOGIN
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+}
+
+enum OtpStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+  FAILED
+}
+
+enum DepositMethod {
+  MANUAL
+  AUTOMATIC
+}
+
+enum DepositStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  CANCELLED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  INVESTMENT_PURCHASE
+  INVESTMENT_RETURN
+  INVESTMENT_MATURITY
+  BALANCE_ADJUSTMENT
+  FEE
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REVERSED
+}
+
+enum InvestmentStatus {
+  ACTIVE
+  MATURED
+  CANCELLED
+  PENDING
+}
+
+enum InvestmentPlanStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum NotificationType {
+  SYSTEM
+  DEPOSIT
+  WITHDRAWAL
+  KYC
+  INVESTMENT
+  MESSAGE
+  NOTICE
+}
+
+enum NotificationStatus {
+  PENDING
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+enum NetworkStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AuditAction {
+  USER_CREATED
+  USER_UPDATED
+  USER_SUSPENDED
+  KYC_APPROVED
+  KYC_DECLINED
+  DEPOSIT_APPROVED
+  DEPOSIT_DECLINED
+  WITHDRAWAL_APPROVED
+  WITHDRAWAL_DECLINED
+  BALANCE_ADJUSTED
+  PLAN_CREATED
+  PLAN_UPDATED
+  CONFIG_UPDATED
+  LOGIN
+  LOGOUT
+  OTHER
+}

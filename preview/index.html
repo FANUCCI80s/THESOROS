@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>THÉSOROS Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0a0a0a;--elev:#111;--card:#161616;--fg:#f5f5f5;--muted:#a3a3a3;--subtle:#737373;--gold:#d4af37;--border:#262626;--gm:rgba(212,175,55,.15);--gb:rgba(212,175,55,.35)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+.serif{font-family:"Playfair Display",Georgia,serif}
+.gt{background:linear-gradient(135deg,#e8c547,var(--gold),#b8960c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header{position:fixed;inset:0 0 auto;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--border);background:rgba(10,10,10,.85);backdrop-filter:blur(12px);z-index:50}
+.logo{font-family:"Playfair Display",serif;font-size:1.35rem;color:var(--gold);font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:500;text-decoration:none;border:none}
+.bg{background:linear-gradient(90deg,#b8960c,var(--gold),#e8c547);color:#000;font-weight:600}
+.bo{border:1px solid var(--gb);color:var(--gold);background:transparent}
+.tabs{position:sticky;top:56px;z-index:40;display:flex;gap:6px;padding:10px 16px;background:rgba(10,10,10,.95);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.tabs button{padding:8px 14px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-size:13px;cursor:pointer}
+.tabs button.on{background:var(--gm);color:var(--gold)}
+.screen{display:none;padding-top:0}
+.screen.on{display:block}
+.hero{min-height:calc(100vh - 100px);display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 20px 40px;background:radial-gradient(ellipse at top,rgba(212,175,55,.12),transparent 55%)}
+.hero h1{font-size:clamp(1.8rem,5vw,3.5rem);line-height:1.15;margin:12px 0 16px}
+.hero .lead{max-width:520px;margin:0 auto 28px;color:var(--muted);line-height:1.6}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.trust{margin-top:36px;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;font-size:13px;color:var(--subtle)}
+.sec{padding:48px 20px;max-width:1100px;margin:0 auto}
+.elev{background:var(--elev);max-width:none}
+.elev .in{max-width:1100px;margin:0 auto;padding:0 20px}
+.eye{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:28px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card h3{margin:10px 0 6px;font-size:16px}
+.card p{font-size:13px;color:var(--muted);line-height:1.5}
+.step{font-size:11px;font-family:monospace;color:rgba(212,175,55,.55)}
+.ic{width:36px;height:36px;border-radius:8px;background:var(--gm);color:var(--gold);display:flex;align-items:center;justify-content:center;margin-top:10px;font-size:14px}
+.dash{display:flex;min-height:70vh}
+.side{width:220px;background:var(--elev);border-right:1px solid var(--border);padding:16px;flex-shrink:0}
+.side a{display:block;padding:10px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:13px;margin-bottom:2px}
+.side a.on{background:var(--gm);color:var(--gold)}
+.main{flex:1;padding:24px 20px}
+.bal{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:20px 0}
+.bal h4{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px}
+.bal .v{font-size:22px;font-weight:600}
+.bal .v.g{color:var(--gold)}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;background:var(--gm);color:var(--gold)}
+.pill.w{background:rgba(245,158,11,.15);color:#f59e0b}
+.pill.s{background:rgba(34,197,94,.15);color:#22c55e}
+@media(max-width:700px){.side{display:none}.hero h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">THÉSOROS</div>
+  <div style="display:flex;gap:8px">
+    <a class="btn" style="color:var(--muted)" href="#">Log in</a>
+    <a class="btn bg" href="#">Get Started</a>
+  </div>
+</header>
+<div class="tabs">
+  <button class="on" onclick="go('landing',this)">Landing</button>
+  <button onclick="go('dash',this)">Dashboard</button>
+  <button onclick="go('deposit',this)">Deposit</button>
+  <button onclick="go('admin',this)">Admin</button>
+  <button onclick="go('login',this)">Login</button>
+</div>
+
+<div id="landing" class="screen on">
+  <section class="hero">
+    <div>
+      <p class="eye">Premium Wealth Management</p>
+      <h1 class="serif">Cultivate Wealth<br/><span class="gt">with Precision</span></h1>
+      <p class="lead">Secure crypto deposits, curated investment plans, and transparent plan-based performance.</p>
+      <div class="ctas">
+        <a class="btn bg" href="#">Open Account →</a>
+        <a class="btn bo" href="#">How It Works</a>
+      </div>
+      <div class="trust"><span>Bank-grade security</span><span>·</span><span>KYC verified</span><span>·</span><span>Crypto-only deposits</span></div>
+    </div>
+  </section>
+  <section class="sec elev">
+    <div class="in">
+      <div style="text-align:center">
+        <p class="eye">Process</p>
+        <h2 class="serif" style="font-size:1.75rem">How THÉSOROS Works</h2>
+      </div>
+      <div class="g4">
+        <div class="card"><div class="step">01</div><div class="ic">1</div><h3>Create Account</h3><p>Sign up and complete KYC verification.</p></div>
+        <div class="card"><div class="step">02</div><div class="ic">2</div><h3>Deposit Crypto</h3><p>Manual or automatic deposit with proof.</p></div>
+        <div class="card"><div class="step">03</div><div class="ic">3</div><h3>Select a Plan</h3><p>Admin-defined plans, plan-based returns.</p></div>
+        <div class="card"><div class="step">04</div><div class="ic">4</div><h3>Track & Withdraw</h3><p>Monitor performance and request withdrawals.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="dash" class="screen">
+  <div class="dash">
+    <aside class="side">
+      <div class="logo" style="font-size:1.15rem;margin-bottom:16px">THÉSOROS</div>
+      <a class="on" href="#">Dashboard</a>
+      <a href="#">Deposit</a>
+      <a href="#">Withdrawal</a>
+      <a href="#">Transactions</a>
+      <a href="#">Profile</a>
+    </aside>
+    <div class="main">
+      <h1 class="serif" style="font-size:1.5rem">Welcome back, Alex</h1>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px">Active plan: <span class="pill">GOLD</span></p>
+      <div class="bal">
+        <div class="card"><h4>Available Balance</h4><div class="v g">$12,500.00</div></div>
+        <div class="card"><h4>Invested Balance</h4><div class="v">$45,000.00</div></div>
+        <div class="card"><h4>Portfolio Value</h4><div class="v">$57,500.00</div></div>
+      </div>
+      <div class="card">
+        <h4 style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Investment Status</h4>
+        <span class="pill">GOLD</span>
+        <span style="color:var(--muted);font-size:13px;margin-left:10px">Plan-based performance is active</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="deposit" class="screen">
+  <div class="dash">
+    <aside class="side">
+      <div class="logo" style="font-size:1.15rem;margin-bottom:16px">THÉSOROS</div>
+      <a href="#">Dashboard</a>
+      <a class="on" href="#">Deposit</a>
+      <a href="#">Withdrawal</a>
+      <a href="#">Transactions</a>
+    </aside>
+    <div class="main" style="max-width:480px">
+      <h1 class="serif" style="font-size:1.5rem">Deposit</h1>
+      <p style="color:var(--muted);font-size:13px;margin:4px 0 20px">Fund with cryptocurrency only</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div class="card" style="border-color:var(--gb)"><h3 style="margin:0 0 6px">Manual</h3><p style="margin:0">Wallet + proof → PAID</p></div>
+        <div class="card"><h3 style="margin:0 0 6px">Automatic</h3><p style="margin:0">PAY NOW → proof → PAID</p></div>
+      </div>
+      <div class="card">
+        <p style="font-size:12px;color:var(--muted)">Amount</p>
+        <div style="font-size:22px;font-weight:600;color:var(--gold);margin:6px 0 14px">5,000.00 USDT</div>
+        <p style="font-size:12px;color:var(--muted)">Wallet</p>
+        <div style="font-family:monospace;font-size:11px;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);word-break:break-all;margin-top:4px">TXyz123ExampleWalletAddress</div>
+        <div style="margin-top:12px;padding:10px;border-radius:8px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.06);font-size:12px;color:var(--muted)">Send only USDT on the selected network.</div>
+        <a class="btn bg" style="width:100%;justify-content:center;margin-top:16px">I have sent the payment</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="admin" class="screen">
+  <div class="dash">
+    <aside class="side">
+      <div class="logo" style="font-size:1.15rem">THÉSOROS</div>
+      <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--subtle);margin:2px 0 14px">Admin Console</div>
+      <a class="on" href="#">Dashboard</a>
+      <a href="#">Users</a>
+      <a href="#">KYC</a>
+      <a href="#">Deposits</a>
+      <a href="#">Withdrawals</a>
+      <a href="#">Plans</a>
+    </aside>
+    <div class="main">
+      <h1 class="serif" style="font-size:1.5rem">Admin Dashboard</h1>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px">Operational overview</p>
+      <div class="bal">
+        <div class="card"><h4>Pending KYC</h4><div class="v" style="color:#f59e0b">17</div></div>
+        <div class="card"><h4>Pending Deposits</h4><div class="v" style="color:#f59e0b">9</div></div>
+        <div class="card"><h4>Pending Withdrawals</h4><div class="v" style="color:#f59e0b">5</div></div>
+        <div class="card"><h4>Total Users</h4><div class="v">1,284</div></div>
+      </div>
+      <div class="card">
+        <h4 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Recent Activity</h4>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span>alex@… · DEPOSIT · $5,000</span><span class="pill w">PENDING</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span>jordan@… · KYC</span><span class="pill w">PENDING</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px">
+          <span>m.chen@… · DEPOSIT · $10,000</span><span class="pill s">APPROVED</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="login" class="screen">
+  <div style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:32px 16px">
+    <div style="width:100%;max-width:360px">
+      <div style="text-align:center;margin-bottom:28px">
+        <div class="logo" style="margin-bottom:20px">THÉSOROS</div>
+        <h1 class="serif" style="font-size:1.6rem">Welcome back</h1>
+        <p style="color:var(--muted);font-size:13px;margin-top:6px">Log in to your account</p>
+      </div>
+      <div class="card">
+        <label style="font-size:12px;color:var(--muted)">Email</label>
+        <div style="margin:6px 0 14px;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--subtle);font-size:14px">you@example.com</div>
+        <label style="font-size:12px;color:var(--muted)">Password</label>
+        <div style="margin:6px 0 18px;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--subtle);font-size:14px">••••••••</div>
+        <a class="btn bg" style="width:100%;justify-content:center">Continue</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function go(id, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+}
+</script>
+</body>
+</html>
