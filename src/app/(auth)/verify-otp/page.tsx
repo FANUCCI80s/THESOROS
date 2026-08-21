@@ -33,7 +33,7 @@ function VerifyForm() {
   const [logoFailed, setLogoFailed] = useState(false);
 
   useEffect(() => {
-    const id = getStoredChallenge();
+    const id = loadChallenge();
     if (!id) {
       router.replace("/login");
       return;

@@ -15,18 +15,24 @@ import { rateLimitOtp } from "@/lib/rate-limit";
 
 /**
  * POST /api/auth/verify-otp
- * Verifies LOGIN OTP, creates session cookie, returns user + KYC routing hint.
+ *
+ * Verifies a LOGIN OTP, creates a session cookie,
+ * and returns the authenticated user + KYC routing hint.
  *
  * After OTP:
- * - KYC NOT_SUBMITTED / DECLINED → client should send user to Profile/KYC
- * - KYC PENDING → limited dashboard / pending state
- * - KYC APPROVED → full dashboard
+ * - KYC NOT_SUBMITTED / DECLINED → Profile/KYC
+ * - KYC PENDING → Dashboard
+ * - KYC APPROVED → Dashboard
+ * - ADMIN / SUPER_ADMIN → Admin Dashboard
  */
 export async function POST(request: NextRequest) {
   try {
     const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+
     const rl = await rateLimitOtp(ip);
+
     if (!rl.allowed) {
       return jsonError("Too many OTP attempts. Try again later.", 429, {
         code: "RATE_LIMITED",
@@ -37,6 +43,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = verifyOtpSchema.parse(body);
 
+    /*
+     * verifyOtpChallenge returns:
+     *
+     * {
+     *   ok: true,
+     *   userId: string,
+     *   purpose: OtpPurpose
+     * }
+     *
+     * It does not return the user object, so we fetch
+     * the user after successful OTP verification.
+     */
     const result = await verifyOtpChallenge({
       challengeId: data.challengeId,
       code: data.code,
@@ -46,23 +64,52 @@ export async function POST(request: NextRequest) {
       return jsonError(result.error, 401);
     }
 
-    const { user } = result.challenge;
+    /*
+     * Fetch the authenticated user and KYC information.
+     */
+    const user = await prisma.user.findUnique({
+      where: {
+        id: result.userId,
+      },
+      include: {
+        kyc: true,
+      },
+    });
+
+    if (!user) {
+      return jsonError("User account not found.", 404);
+    }
+
     const meta = clientMeta(request);
 
+    /*
+     * Create authenticated session.
+     */
     const session = await createSession({
       userId: user.id,
       ipAddress: meta.ipAddress,
       userAgent: meta.userAgent,
     });
 
+    /*
+     * Mark the user's email as verified and update login timestamp.
+     */
     await prisma.user.update({
-      where: { id: user.id },
+      where: {
+        id: user.id,
+      },
       data: {
         lastLoginAt: new Date(),
         emailVerified: true,
       },
     });
 
+    /*
+     * Record successful login in the audit log.
+     *
+     * Audit logging should never prevent a successful login,
+     * therefore failures are intentionally ignored.
+     */
     await prisma.auditLog
       .create({
         data: {
@@ -76,23 +123,38 @@ export async function POST(request: NextRequest) {
       })
       .catch(() => {});
 
+    /*
+     * Set the authenticated session cookie.
+     */
     const cookieStore = await cookies();
+
     cookieStore.set(
       SESSION_COOKIE,
       session.token,
       sessionCookieOptions(session.expiresAt)
     );
 
+    /*
+     * Determine KYC status.
+     */
     const kycStatus = user.kyc?.status ?? "NOT_SUBMITTED";
 
-    // Client routing guidance (blueprint: KYC status determines post-OTP path)
+    /*
+     * Determine where the user should go after verification.
+     */
     let redirectTo = "/dashboard";
-    if (kycStatus === "NOT_SUBMITTED" || kycStatus === "DECLINED") {
-      redirectTo = "/profile"; // KYC lives under Profile
+
+    if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
+      redirectTo = "/admin/dashboard";
+    } else if (
+      kycStatus === "NOT_SUBMITTED" ||
+      kycStatus === "DECLINED"
+    ) {
+      redirectTo = "/profile";
     } else if (kycStatus === "PENDING") {
       redirectTo = "/dashboard";
-    } else if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
-      redirectTo = "/admin/dashboard";
+    } else if (kycStatus === "APPROVED") {
+      redirectTo = "/dashboard";
     }
 
     return jsonOk({
@@ -102,8 +164,15 @@ export async function POST(request: NextRequest) {
       redirectTo,
     });
   } catch (err) {
-    if (err instanceof ZodError) return zodErrorResponse(err);
+    if (err instanceof ZodError) {
+      return zodErrorResponse(err);
+    }
+
     console.error("[auth/verify-otp]", err);
-    return jsonError("Unable to verify code. Please try again.", 500);
+
+    return jsonError(
+      "Unable to verify code. Please try again.",
+      500
+    );
   }
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -185,12 +185,14 @@ function Reveal({
   className = "",
   as: Tag = "div",
   delay = 0,
+  id,
 }: {
   children: ReactNode;
   variant?: "fade" | "slide-up" | "slide-left" | "slide-right" | "float";
   className?: string;
   as?: "div" | "section" | "article";
   delay?: number;
+  id?: string;
 }) {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
@@ -216,6 +218,7 @@ function Reveal({
   return (
     <Tag
       ref={ref as never}
+      id={id}
       className={`reveal reveal-${variant} ${visible ? "reveal-visible" : ""} ${className}`}
       style={{ transitionDelay: visible ? `${delay}ms` : "0ms" }}
     >
@@ -223,7 +226,6 @@ function Reveal({
     </Tag>
   );
 }
-
 function CapabilityCard({
   capability,
   index,
@@ -286,7 +288,7 @@ function CapabilityCard({
 
             <div className="capability-link">
               <span>DISCOVER MORE</span>
-              <span className="capability-arrow">→</span>
+              <span className="capability-arrow">â†’</span>
             </div>
           </div>
         </div>
@@ -1392,10 +1394,10 @@ export default function HomePage() {
         /* ============================================================
            RESPONSIVE BREAKPOINTS (mobile-first aligned)
            -- mobile:  default  (< 640px)
-           -- sm:      ≥ 640px
-           -- md:      ≥ 768px  (tablet)
-           -- lg:      ≥ 1024px (desktop)
-           -- xl:      ≥ 1280px
+           -- sm:      â‰¥ 640px
+           -- md:      â‰¥ 768px  (tablet)
+           -- lg:      â‰¥ 1024px (desktop)
+           -- xl:      â‰¥ 1280px
            Mobile overrides use max-width: 639px / 767px / 1023px
            ============================================================ */
 
@@ -1428,7 +1430,7 @@ export default function HomePage() {
           }
         }
 
-        /* Tablet and below — collapse desktop nav */
+        /* Tablet and below â€” collapse desktop nav */
         @media (max-width: 767px) {
           .site-header {
             height: 72px;
@@ -1757,7 +1759,7 @@ export default function HomePage() {
           <Link href="/" className="logo-link">
             <Image
               src="/Logo.png"
-              alt="THÉSOROS"
+              alt="THÃ‰SOROS"
               width={220}
               height={70}
               className="site-logo"
@@ -1801,7 +1803,7 @@ export default function HomePage() {
             onClick={() => setMenuOpen((value) => !value)}
             aria-label="Toggle navigation"
           >
-            {menuOpen ? "×" : "☰"}
+            {menuOpen ? "Ã—" : "â˜°"}
           </button>
         </div>
       </header>
@@ -1849,7 +1851,7 @@ export default function HomePage() {
             />
             <Image
               src="/Background.jpg"
-              alt="THÉSOROS heritage landscape"
+              alt="THÃ‰SOROS heritage landscape"
               fill
               priority
               sizes="100vw"
@@ -1876,9 +1878,9 @@ export default function HomePage() {
             </div>
 
             <p className="hero-description">
-              THÉSOROS is where ancient wealth principles meet modern investing.
+              THÃ‰SOROS is where ancient wealth principles meet modern investing.
               Founded in Athens, grown globally, we help protect and grow what
-              matters most — your legacy.
+              matters most â€” your legacy.
             </p>
 
             <div className="hero-actions">
@@ -1898,9 +1900,9 @@ export default function HomePage() {
 
             <div className="hero-trust">
               <span className="hero-trust-mark">
-                <span>✓</span>
+                <span>âœ“</span>
               </span>
-              Bank-grade security · Global compliance · Total transparency
+              Bank-grade security Â· Global compliance Â· Total transparency
             </div>
           </div>
         </div>
@@ -1908,9 +1910,9 @@ export default function HomePage() {
         <div className="hero-bottom-fade" />
       </section>
 
-      {/* INTRO — fade + slide up */}
+      {/* INTRO â€” fade + slide up */}
       <Reveal as="section" variant="slide-up" className="intro-section" id="invest">
-        <div className="section-label">THE THÉSOROS PHILOSOPHY</div>
+        <div className="section-label">THE THÃ‰SOROS PHILOSOPHY</div>
         <h2 className="intro-title">
           Wealth should be built for
           <br />
@@ -1924,11 +1926,11 @@ export default function HomePage() {
         <div className="ornament" />
       </Reveal>
 
-      {/* CAPABILITIES — alternate slide left / right */}
+      {/* CAPABILITIES â€” alternate slide left / right */}
       <section className="capabilities-section" id="wealth">
         <Reveal variant="fade" className="capabilities-heading">
           <div>
-            <div className="section-label">WHAT MAKES THÉSOROS DIFFERENT</div>
+            <div className="section-label">WHAT MAKES THÃ‰SOROS DIFFERENT</div>
             <h2>
               Five pillars of
               <br />
@@ -1951,7 +1953,7 @@ export default function HomePage() {
         ))}
       </section>
 
-      {/* PHILOSOPHY — float */}
+      {/* PHILOSOPHY â€” float */}
       <Reveal as="section" variant="float" className="philosophy" id="legacy">
         <div className="section-label">BUILT AROUND YOUR LEGACY</div>
         <h2 className="philosophy-title">
@@ -1960,14 +1962,14 @@ export default function HomePage() {
           is <em>what remains.</em>
         </h2>
         <p className="philosophy-description">
-          Your financial journey should not end with a balance sheet. THÉSOROS
+          Your financial journey should not end with a balance sheet. THÃ‰SOROS
           is designed to help you create, preserve, and pass on a legacy that
           extends far beyond yourself.
         </p>
         <div className="ornament" />
       </Reveal>
 
-      {/* CTA — slide up + fade */}
+      {/* CTA â€” slide up + fade */}
       <Reveal as="section" variant="slide-up" className="cta-section" id="get-app">
         <div className="cta-box">
           <div className="section-label">BEGIN YOUR JOURNEY</div>
@@ -1978,7 +1980,7 @@ export default function HomePage() {
           </h2>
           <p className="cta-text">
             Step into a more intelligent approach to wealth management. Create
-            your THÉSOROS account and begin building toward what comes next.
+            your THÃ‰SOROS account and begin building toward what comes next.
           </p>
           <div className="cta-actions">
             <Link href="/signup" className="hero-button hero-button-primary">
@@ -1994,7 +1996,7 @@ export default function HomePage() {
         </div>
       </Reveal>
 
-      {/* FOOTER — fade */}
+      {/* FOOTER â€” fade */}
       <Reveal as="div" variant="fade">
         <footer className="footer" id="insights">
           <div className="footer-inner">
@@ -2002,7 +2004,7 @@ export default function HomePage() {
               <div>
                 <Image
                   src="/Logo.png"
-                  alt="THÉSOROS"
+                  alt="THÃ‰SOROS"
                   width={210}
                   height={70}
                   className="footer-logo"
@@ -2040,7 +2042,7 @@ export default function HomePage() {
 
             <div className="footer-bottom">
               <span>
-                © {new Date().getFullYear()} THÉSOROS. All rights reserved.
+                Â© {new Date().getFullYear()} THÃ‰SOROS. All rights reserved.
               </span>
               <span>GUIDING WEALTH. GROWING LEGACIES.</span>
             </div>
@@ -2050,3 +2052,4 @@ export default function HomePage() {
     </main>
   );
 }
+
